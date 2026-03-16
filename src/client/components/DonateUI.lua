@@ -64,7 +64,7 @@ local function DonateUI()
     }, {
         DonateButtonContainer = E("Frame", {
             Size = UDim2.new(0, 120, 0, 40),
-            Position = UDim2.new(0, 20, 0, 20),
+            Position = UDim2.new(0, 20, 0, 70),
             BackgroundTransparency = 1,
         }, {
             DonateButton = E("TextButton", {

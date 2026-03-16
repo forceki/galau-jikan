@@ -1,6 +1,6 @@
 local DonationConfig = {
     VARIANTS = {
-        { amount = 1,   id = 3553078542, color = Color3.fromRGB(120, 200, 120) },
+        -- { amount = 1,   id = 3553078542, color = Color3.fromRGB(120, 200, 120) },
         { amount = 5,   id = 3553078604, color = Color3.fromRGB(100, 180, 220) },
         -- { amount = 10,  id = 1234569, color = Color3.fromRGB(180, 120, 220) },
         -- { amount = 50,  id = 1234570, color = Color3.fromRGB(220, 180, 100) },

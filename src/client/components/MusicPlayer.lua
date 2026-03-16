@@ -7,6 +7,7 @@ local PLAYLIST = {
     {id = "rbxassetid://81549849467553", title = "あなたのことが好き"},
     {id = "rbxassetid://128560685759007", title = "ヨルシカ - ただ君に晴れ"},
     {id = "rbxassetid://134417754010566", title = "りりあriria. 最後のバイバイ"},
+    {id = "rbxassetid://138236748297755", title = "忘れじの言の葉 (Forgotten Words)  Shania Yan Cover"}
 }
 
 local function MusicPlayer()
@@ -14,6 +15,8 @@ local function MusicPlayer()
     local isPlaying, setPlaying = React.useState(false)
     local isExpanded, setExpanded = React.useState(false) 
     local isPlayerVisible, setPlayerVisible = React.useState(true)
+    local volume, setVolume = React.useState(0.5)
+    local isVolumeExpanded, setVolumeExpanded = React.useState(false)
     
     local barHeights, setBarHeights = React.useBinding({3, 3, 3, 3, 3})
     local progress, setProgress = React.useBinding(0)
@@ -50,6 +53,10 @@ local function MusicPlayer()
         end)
         return function() connection:Disconnect() end
     end, {trackIndex, isPlaying})
+
+    React.useEffect(function()
+        sound.Volume = volume
+    end, {volume})
 
     local songElements = {
         UIList = E("UIListLayout", { 
@@ -107,7 +114,7 @@ local function MusicPlayer()
     }, {
         ToggleBtnContainer = E("Frame", {
             Size = UDim2.new(0, 120, 0, 30),
-            Position = UDim2.new(0, 20, 0, 65), -- Placed right underneath the Donate UI (pos 20, 20 + size 40)
+            Position = UDim2.new(0, 20, 0, 115), -- Placed right underneath the Donate UI (pos 70 + size 40 + gap 5)
             AnchorPoint = Vector2.new(0, 0),
             BackgroundTransparency = 1,
         }, {
@@ -157,7 +164,7 @@ local function MusicPlayer()
         }),
 
         Controls = E("Frame", { LayoutOrder = 4, Size = UDim2.new(1, 0, 0, 35), BackgroundTransparency = 1, ClipsDescendants = false }, {
-            E("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, HorizontalAlignment = Enum.HorizontalAlignment.Center, VerticalAlignment = Enum.VerticalAlignment.Center, Padding = UDim.new(0, 15) }),
+            E("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, HorizontalAlignment = Enum.HorizontalAlignment.Center, VerticalAlignment = Enum.VerticalAlignment.Center, Padding = UDim.new(0, 10) }),
 
             MenuContainer = E("Frame", {
                 Size = UDim2.new(0, 18, 0, 18),
@@ -245,6 +252,71 @@ local function MusicPlayer()
             Prev = E("ImageButton", { Image = "rbxassetid://130750647080057", Size = UDim2.new(0, 18, 0, 18), BackgroundTransparency = 1, [React.Event.Activated] = function() local n = trackIndex - 1; if n < 1 then n = #PLAYLIST end; playTrack(n) end }),
             Play = E("ImageButton", { Image = isPlaying and "rbxassetid://99570475438430" or "rbxassetid://126058622133572", Size = UDim2.new(0, 24, 0, 24), BackgroundTransparency = 1, [React.Event.Activated] = function() if isPlaying then sound:Pause() else sound:Play() end; setPlaying(not isPlaying) end }),
             Next = E("ImageButton", { Image = "rbxassetid://138802853324251", Size = UDim2.new(0, 18, 0, 18), Rotation = 180, BackgroundTransparency = 1, [React.Event.Activated] = function() local n = trackIndex + 1; if n > #PLAYLIST then n = 1 end; playTrack(n) end }),
+            VolumeContainer = E("Frame", {
+                Size = UDim2.new(0, 18, 0, 18),
+                BackgroundTransparency = 1,
+                ClipsDescendants = false,
+            }, {
+                VolIcon = E("ImageButton", { 
+                    Image = "rbxassetid://98164328373935", 
+                    ImageTransparency = volume == 0 and 0.5 or 0, 
+                    Size = UDim2.new(1, 0, 1, 0), 
+                    BackgroundTransparency = 1, 
+                    [React.Event.Activated] = function() setVolumeExpanded(not isVolumeExpanded) end 
+                }),
+                
+                VolumePopup = isVolumeExpanded and E("Frame", {
+                    Size = UDim2.new(0, 24, 0, 80),
+                    Position = UDim2.new(0.5, 0, 0, -10),
+                    AnchorPoint = Vector2.new(0.5, 1),
+                    BackgroundColor3 = Color3.fromRGB(20, 20, 20),
+                    BackgroundTransparency = 0.1,
+                    ZIndex = 15,
+                }, {
+                    Corner = E("UICorner", { CornerRadius = UDim.new(0, 6) }),
+                    Stroke = E("UIStroke", { Color = Color3.fromRGB(60, 60, 60), Thickness = 1 }),
+                    
+                    VolSlider = E("TextButton", {
+                        Text = "",
+                        Size = UDim2.new(0, 4, 1, -20),
+                        Position = UDim2.new(0.5, 0, 0.5, 0),
+                        AnchorPoint = Vector2.new(0.5, 0.5),
+                        BackgroundColor3 = Color3.fromRGB(80, 80, 80),
+                        AutoButtonColor = false,
+                        ZIndex = 16,
+                        [React.Event.InputBegan] = function(rbx, input)
+                            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                                local pct = math.clamp(1 - ((input.Position.Y - rbx.AbsolutePosition.Y) / rbx.AbsoluteSize.Y), 0, 1)
+                                setVolume(pct)
+                            end
+                        end,
+                        [React.Event.InputChanged] = function(rbx, input)
+                            if input.UserInputType == Enum.UserInputType.MouseMovement and game:GetService("UserInputService"):IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
+                                local pct = math.clamp(1 - ((input.Position.Y - rbx.AbsolutePosition.Y) / rbx.AbsoluteSize.Y), 0, 1)
+                                setVolume(pct)
+                            end
+                        end,
+                    }, {
+                        Fill = E("Frame", {
+                            Size = UDim2.new(1, 0, volume, 0),
+                            Position = UDim2.new(0, 0, 1, 0),
+                            AnchorPoint = Vector2.new(0, 1),
+                            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                            BorderSizePixel = 0,
+                            ZIndex = 17,
+                        }),
+                        Knob = E("Frame", {
+                            Size = UDim2.new(0, 8, 0, 8),
+                            Position = UDim2.new(0.5, 0, 1 - volume, 0),
+                            AnchorPoint = Vector2.new(0.5, 0.5),
+                            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+                            ZIndex = 18,
+                        }, {
+                            Corner = E("UICorner", { CornerRadius = UDim.new(1, 0) })
+                        })
+                    })
+                })
+            }),
         }),
         })
     })
