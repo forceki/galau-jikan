@@ -27,13 +27,20 @@ function DataManager.LoadProfile(player)
         return PlayerDataStore:GetAsync(userId)
     end)
     
-    local profileData = deepCopyTable(DataSchema)
+    -- Use DataSchema.init to fill player_id and player_info from the real Player object
+    local profileData = DataSchema.init(player)
     
     if success and data and type(data) == "table" then
-        -- Add or overwrite the schema values with the saved values
+        -- Overwrite defaults with saved values, but always keep fresh player_info
         for k, v in pairs(data) do
             profileData[k] = v
         end
+        -- Always sync latest username & display name (they can change on Roblox)
+        profileData.player_id = tostring(player.UserId)
+        profileData.player_info = {
+            username = player.Name,
+            display_name = player.DisplayName,
+        }
     end
     
     profileData.last_login = os.time()
@@ -72,9 +79,9 @@ function DataManager.ProcessDonation(userId, amount)
     
     local success, err = pcall(function()
         local updatedData = PlayerDataStore:UpdateAsync(playerKey, function(oldData)
-            local newData = oldData or deepCopyTable(DataSchema)
+            local newData = oldData or deepCopyTable(DataSchema.default)
             if type(newData) ~= "table" then
-                newData = deepCopyTable(DataSchema)
+                newData = deepCopyTable(DataSchema.default)
             end
             newData.donation = (newData.donation or 0) + amount
             return newData
