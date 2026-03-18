@@ -7,8 +7,7 @@ local TARGET_RETURN = Vector3.new(14.809, 7.516, 146) -- Ganti dengan koordinat 
 local GATE_GO = "TeleportGate"
 local GATE_BACK = "TeleportGateBack"
 
-local playerDebounce = {}
-
+local playerDebounce = {}P
 local function setupTeleporter(sensor, isGoingBack)
     -- Pastikan ini adalah part
     if not sensor:IsA("BasePart") then return end

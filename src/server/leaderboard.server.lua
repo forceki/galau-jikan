@@ -36,13 +36,21 @@ local function onPlayerAdded(player: Player)
                 local currentData = DataManager.GetProfile(player)
                 if currentData then
                     currentData.galau_time = stayTime.Value
-                    
-                    -- Simpan posisi realtime mereka setiap menit agar aman
-                    local char = player.Character
-                    if char and char:FindFirstChild("HumanoidRootPart") then
-                        local pos = char.HumanoidRootPart.Position
-                        currentData.last_position = {x = pos.X, y = pos.Y, z = pos.Z}
-                    end
+                end
+            end
+        end
+    end)
+
+    -- Tracker posisi yang lebih sering agar akurat saat pemain keluar
+    task.spawn(function()
+        while player.Parent do
+            task.wait(2)
+            if player.Parent then
+                local currentData = DataManager.GetProfile(player)
+                local char = player.Character
+                if currentData and char and char:FindFirstChild("HumanoidRootPart") then
+                    local pos = char.HumanoidRootPart.Position
+                    currentData.last_position = {x = pos.X, y = pos.Y, z = pos.Z}
                 end
             end
         end
@@ -50,15 +58,6 @@ local function onPlayerAdded(player: Player)
 end
 
 local function onPlayerRemoving(player: Player)
-    local currentData = DataManager.GetProfile(player)
-    local char = player.Character
-    
-    -- Simpan detik-detik terakhir posisi mereka sebelum keluar
-    if currentData and char and char:FindFirstChild("HumanoidRootPart") then
-        local pos = char.HumanoidRootPart.Position
-        currentData.last_position = {x = pos.X, y = pos.Y, z = pos.Z}
-    end
-
     -- This handles the deep save of the new consolidated JSON table
     DataManager.ReleaseProfile(player)
 end
