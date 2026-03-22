@@ -4,24 +4,25 @@ local React = require(ReplicatedStorage.Packages.React)
 local E = React.createElement
 
 local function LoadingScreen(props)
-    local progress, setProgress = React.useState(0)
-    local isFading, setFading = React.useState(false)
-    local fadeTransparency, setFadeTransparency = React.useState(0)
+    local progress, setProgress = React.useBinding(0)
+    local fadeTransparency, setFadeTransparency = React.useBinding(0)
     local loadingText, setLoadingText = React.useState("LOADING ASSETS...")
 
     React.useEffect(function()
         local isMounted = true
+        local isPreloaded = false
 
         task.spawn(function()
             if not game:IsLoaded() then
                 game.Loaded:Wait()
             end
             
+            -- Fake progress task
             task.spawn(function()
                 for i = 1, 85 do
-                    if not isMounted or isFading then break end
+                    if not isMounted or isPreloaded then break end
                     setProgress(i / 100)
-                    task.wait(0.01)
+                    task.wait(0.02)
                 end
             end)
             
@@ -30,13 +31,15 @@ local function LoadingScreen(props)
                 ContentProvider:PreloadAsync(toLoad)
             end)
             
+            isPreloaded = true
+            
             if not isMounted then return end
             
             setLoadingText("Loading...")
             setProgress(1)
-            task.wait(1)
+            task.wait(0.5)
             
-            setFading(true)
+            -- Fade out animation
             local fadeSteps = 20
             for i = 1, fadeSteps do
                 if not isMounted then return end
@@ -51,8 +54,9 @@ local function LoadingScreen(props)
 
         return function()
             isMounted = false
+            isPreloaded = true
         end
-    end, {props.onFinish})
+    end, {}) -- dependencies dikosongkan agar tidak restart loading gara-gara onFinish berganti identitas memori
 
     return E("Frame", {
         Size = UDim2.new(1, 0, 1, 0),
@@ -90,7 +94,7 @@ local function LoadingScreen(props)
             }, {
                 UICorner = E("UICorner", { CornerRadius = UDim.new(1, 0) }),
                 Fill = E("Frame", {
-                    Size = UDim2.new(progress, 0, 1, 0),
+                    Size = progress:map(function(p) return UDim2.new(p, 0, 1, 0) end),
                     BackgroundColor3 = Color3.fromRGB(120, 200, 255),
                     BackgroundTransparency = fadeTransparency,
                     BorderSizePixel = 0,

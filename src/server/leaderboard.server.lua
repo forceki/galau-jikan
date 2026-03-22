@@ -10,9 +10,14 @@ local function onPlayerAdded(player: Player)
     stayTime.Name = "Menit Galau" 
     stayTime.Parent = leaderstats
 
+    local galauPointsStats = Instance.new("IntValue")
+    galauPointsStats.Name = "GalauPoints"
+    galauPointsStats.Parent = leaderstats
+
     -- Load the consolidated JSON table profile for this user
     local profileData = DataManager.LoadProfile(player)
     stayTime.Value = profileData.galau_time or 0
+    galauPointsStats.Value = profileData.galau_point or 0
 
     -- Teleport pemain ke posisi terakhir saat karakter mereka spawn
     player.CharacterAdded:Connect(function(character)

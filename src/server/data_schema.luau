@@ -7,13 +7,13 @@ DataSchema.default = {
         username = "",
         display_name = "",
     },
+    galau_point = 0,
     donation = 0,
     galau_time = 0,
     last_login = 0,
     last_position = nil,
 }
 
--- Init function: fills schema with real Player data
 function DataSchema.init(player: Player)
     return {
         player_id = tostring(player.UserId),

@@ -78,9 +78,16 @@ end
 -- --- SUPPORT UNTUK LEGACY CHAT SYSTEM ---
 -- Jika game menggunakan Legacy Chat, script di bawah akan memasukkan Tags.
 local function attachLegacyChatTags()
+    local runner = ServerScriptService:FindFirstChild("ChatServiceRunner")
+    if not runner then return end
+    
+    local chatModule = runner:FindFirstChild("ChatService")
+    if not chatModule then return end
+
     local success, ChatService = pcall(function()
-        return require(ServerScriptService:WaitForChild("ChatServiceRunner"):WaitForChild("ChatService"))
+        return require(chatModule)
     end)
+    
     if success and ChatService then
         ChatService.SpeakerAdded:Connect(function(speakerName)
             local speaker = ChatService:GetSpeaker(speakerName)
@@ -100,7 +107,8 @@ local function attachLegacyChatTags()
     end
 end
 
--- Panggil untuk legacy system dengan pcall safe agar tidak error kalau TextChatService dipakai
+-- Panggil dengan delay ringan agar ChatServiceRunner (jika ada) memuat lebih dulu
 task.spawn(function()
+    task.wait(2)
     pcall(attachLegacyChatTags)
 end)

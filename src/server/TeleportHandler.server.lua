@@ -7,25 +7,27 @@ local TARGET_RETURN = Vector3.new(14.809, 7.516, 146) -- Ganti dengan koordinat 
 local GATE_GO = "TeleportGate"
 local GATE_BACK = "TeleportGateBack"
 
-local playerDebounce = {}P
+local playerDebounce = {}
 local function setupTeleporter(sensor, isGoingBack)
     -- Pastikan ini adalah part
     if not sensor:IsA("BasePart") then return end
     
     sensor.Touched:Connect(function(hit)
-        local character = hit.Parent
+        local character = hit and hit.Parent
+        if not character then return end
+        
         local rootPart = character:FindFirstChild("HumanoidRootPart")
         local humanoid = character:FindFirstChild("Humanoid")
         
         if humanoid and rootPart and humanoid.Health > 0 then
             -- Cek apakah player ini sedang dalam cooldown teleport
             local lastTeleport = playerDebounce[character]
-            if lastTeleport and (tick() - lastTeleport) < 3 then
+            if lastTeleport and (os.clock() - lastTeleport) < 3 then
                 return -- Keluar jika belum 3 detik sejak teleport terakhir
             end
             
             -- Masukkan player ke daftar cooldown
-            playerDebounce[character] = tick()
+            playerDebounce[character] = os.clock()
             
             -- Tentukan lokasi target berdasarkan apakah ini pintu pergi atau pintu pulang
             local targetLocation = sensor:GetAttribute("TargetLocation")
@@ -33,8 +35,11 @@ local function setupTeleporter(sensor, isGoingBack)
                 targetLocation = isGoingBack and TARGET_RETURN or TARGET_DESTINATION
             end
             
+            -- Parsing target menjadi CFrame apabila ia bukan CFrame (cth: Vector3)
+            local pivotCFrame = typeof(targetLocation) == "CFrame" and targetLocation or CFrame.new(targetLocation)
+            
             -- Menggunakan PivotTo sangat aman buat karaker agar tidak nge-glitch/nyangkut
-            character:PivotTo(CFrame.new(targetLocation))
+            character:PivotTo(pivotCFrame)
         end
     end)
 end
