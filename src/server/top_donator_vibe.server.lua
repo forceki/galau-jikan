@@ -129,7 +129,8 @@ local function updateTopDonators()
             
             local userId = tonumber(data.key)
             local donationAmount = data.value
-            local npcModel = workspace:FindFirstChild(npcNames[rank])
+            local place2 = workspace:FindFirstChild("Place2")
+            local npcModel = place2:FindFirstChild(npcNames[rank])
             
             if npcModel and userId then
                 local schemaSuccess, schemaData = pcall(function()

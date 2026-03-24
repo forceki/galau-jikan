@@ -23,7 +23,7 @@ MarketplaceService.PromptPurchaseFinished:Connect(function(player, assetId, isPu
                 end
             end
             
-            print("Data " .. player.Name .. " berhasil diupdate ke Schema melalui Catalog Avatar!")
+            -- print("Data " .. player.Name .. " berhasil diupdate ke Schema melalui Catalog Avatar!")
         end
     end
 end)

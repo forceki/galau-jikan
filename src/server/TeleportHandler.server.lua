@@ -2,7 +2,7 @@ local CollectionService = game:GetService("CollectionService")
 
 -- UBAH KOORDINAT DI BAWAH INI
 local TARGET_DESTINATION = Vector3.new(547.809, 7.516, 1921.578)
-local TARGET_RETURN = Vector3.new(14.809, 7.516, 146) -- Ganti dengan koordinat pintu masuk aslimu
+local TARGET_RETURN = Vector3.new(-1862.371, 9.924, -1843.516) -- Ganti dengan koordinat pintu masuk aslimu
 
 local GATE_GO = "TeleportGate"
 local GATE_BACK = "TeleportGateBack"
