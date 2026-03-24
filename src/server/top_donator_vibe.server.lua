@@ -122,15 +122,19 @@ local function updateTopDonators()
 
     if success and pages then
         local topDonators = pages:GetCurrentPage()
-        local npcNames = {"NPC_Top1", "NPC_Top2", "NPC_Top3"}
+        local npcNames = {"NPC_TOP1", "NPC_TOP2", "NPC_TOP3"}
 
         for rank, data in ipairs(topDonators) do
             if rank > 3 then break end
             
             local userId = tonumber(data.key)
             local donationAmount = data.value
-            local place2 = workspace:FindFirstChild("Place2")
-            local npcModel = place2:FindFirstChild(npcNames[rank])
+            
+            local leaderboardFolder = workspace:FindFirstChild("DonationLeaderboard")
+            print(leaderboardFolder)
+            local npcContainer = leaderboardFolder and leaderboardFolder:FindFirstChild(npcNames[rank])
+            local npcModel = npcContainer and npcContainer:FindFirstChild("rig")
+            print(npcModel)
             
             if npcModel and userId then
                 local schemaSuccess, schemaData = pcall(function()

@@ -60,8 +60,8 @@ function DataManager.SaveProfile(player)
     
     local success, err = pcall(function()
         PlayerDataStore:SetAsync(userId, data)
-        DonationLeaderboard:SetAsync(tostring(player.UserId), data.donation or 0)
-        GalauTimeLeaderboard:SetAsync(tostring(player.UserId), data.galau_time or 0)
+        DonationLeaderboard:SetAsync(tostring(player.UserId), math.floor(data.donation or 0))
+        GalauTimeLeaderboard:SetAsync(tostring(player.UserId), math.floor(data.galau_time or 0))
     end)
     
     if not success then
@@ -88,15 +88,37 @@ function DataManager.ProcessDonation(userId, amount)
         end)
         
         if updatedData and updatedData.donation then
-            DonationLeaderboard:SetAsync(tostring(userId), updatedData.donation)
+            -- OrderedDataStore WAJIB menerima nilai Integer, gunakan math.floor
+            local exactDonationNum = math.floor(updatedData.donation)
+            DonationLeaderboard:SetAsync(tostring(userId), exactDonationNum)
+            print("[DataManager] Successfully pushed " .. tostring(exactDonationNum) .. " to GlobalLeaderboard_Donations_v1 !")
         end
     end)
     
     if not success then
-        warn("Failed to process donation for User " .. tostring(userId) .. ": " .. tostring(err))
+        warn("Failed to process donation for User " .. tostring(userId) .. " | Error: " .. tostring(err))
     end
     
     return success
+end
+
+function DataManager.finalSave(player, schema)
+    local key = "Player_" .. player.UserId
+    
+    -- 1. Simpan Full JSON (Untuk Info NPC & Load Player)
+    pcall(function()
+        PlayerDataStore:SetAsync(key, schema)
+    end)
+    
+    -- 2. Simpan Angka Saja (Untuk Ranking NPC & Board)
+    pcall(function()
+        DonationLeaderboard:SetAsync(tostring(player.UserId), math.floor(schema.donation or 0))
+    end)
+    
+    -- 3. Simpan Stay Time / Galau Time
+    pcall(function()
+        GalauTimeLeaderboard:SetAsync(tostring(player.UserId), math.floor(schema.galau_time or 0))
+    end)
 end
 
 return DataManager
